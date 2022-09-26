@@ -3,16 +3,17 @@ const { User } = require("../../models");
 
 // CREATE new user
 router.post("/", async (req, res) => {
+  console.log(req.body)
   try {
     const dbUserData = await User.create({
       username: req.body.username,
       password: req.body.password,
     });
-
+    console.log(dbUserData);
     req.session.save(() => {
       req.session.loggedIn = true;
       req.session.username = dbUserData.username;
-      req.session.userId = dbUserData.id;
+      req.session.userId = dbUserData.id;  
 
       res.status(200).json(dbUserData);
     });
@@ -47,9 +48,7 @@ router.post("/login", async (req, res) => {
       req.session.userId = user.id;
       console.log(req.session.cookie);
 
-      res
-        .status(200)
-        .json({ user: dbUserData, message: "You are now logged in!" });
+      res.status(200).json({ user, message: "You are now logged in!" });
     });
   } catch (error) {
     console.log(error);
@@ -57,7 +56,7 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/logout", (req, res) => {
-  if (req.session.logged_in) {
+  if (req.session.loggedIn) {
     req.session.destroy(() => {
       res.status(204).end();
     });
@@ -69,8 +68,8 @@ router.post("/logout", (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const users = await User.findAll();
-    if (!users){
-      res.status(200).json({msg: "No users in DB"})
+    if (!users) {
+      res.status(200).json({ msg: "No users in DB" });
       return;
     }
     res.status(200).json(users);
@@ -80,5 +79,16 @@ router.get("/", async (req, res) => {
   }
 });
 
-module.exports = router;
+router.delete("/:id", async (req, res) => {
+  try {
+    const deletedUser = await User.destroy({ where: { id: req.params.id } });
+    if (!deletedUser)
+      res.status(404).json({ msg: "No user by that ID exists" });
+    res.json(deletedUser);
+  } catch (err) {
+    res.status(500).json(error);
+    console.log(error);
+  }
+});
 
+module.exports = router;
