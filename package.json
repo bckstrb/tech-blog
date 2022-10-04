@@ -12,7 +12,8 @@
   },
   "scripts": {
     "start": "node server.js",
-    "develop":"nodemon server.js"
+    "develop":"nodemon server.js",
+    "seed": "node seeds/seed.js"
   },
   "name": "tech-blog",
   "description": "",
